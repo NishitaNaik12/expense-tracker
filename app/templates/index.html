@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="dashboard-header">
+    <h1>Dashboard</h1>
+    <div class="header-actions">
+        <a href="{{ url_for('main.add_expense') }}" class="btn btn-primary">Add Expense</a>
+        <div class="summary-card">
+            <span class="label">Overall Total</span>
+            <span class="value">${{ "%.2f"|format(total_amount) }}</span>
+        </div>
+    </div>
+</header>
+
+<section class="expense-list">
+    {% if groups %}
+        {% for group in groups %}
+        <div class="month-group">
+            <div class="month-header">
+                <h2>{{ group.month }}</h2>
+                <span class="month-total">Monthly Total: ${{ "%.2f"|format(group.total) }}</span>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>
+                                <div class="th-content">
+                                    Amount
+                                    <div class="sort-icons">
+                                        <a href="{{ url_for('main.index', sort='amount_asc', category=current_category) }}" class="sort-arrow {{ 'active' if current_sort == 'amount_asc' }}" title="Sort Low to High">▲</a>
+                                        <a href="{{ url_for('main.index', sort='amount_desc', category=current_category) }}" class="sort-arrow {{ 'active' if current_sort == 'amount_desc' }}" title="Sort High to Low">▼</a>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content">
+                                    Category
+                                    <form action="{{ url_for('main.index') }}" method="GET" class="header-filter-form">
+                                        <input type="hidden" name="sort" value="{{ current_sort }}">
+                                        <select name="category" onchange="this.form.submit()" class="mini-select" title="Filter by Category">
+                                            <option value="">All</option>
+                                            {% for cat in ['Food', 'Travel', 'Utilities', 'Others'] %}
+                                            <option value="{{ cat }}" {{ 'selected' if current_category == cat }}>{{ cat }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content">
+                                    Date
+                                    <a href="{{ url_for('main.index', sort='date_desc', category=current_category) }}" class="sort-arrow {{ 'active' if current_sort == 'date_desc' }}" title="Sort by Newest">▼</a>
+                                </div>
+                            </th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in group.expenses %}
+                        <tr>
+                            <td data-label="Title" class="font-medium">{{ expense.title }}</td>
+                            <td data-label="Description" class="text-muted text-sm">{{ expense.description or '-' }}</td>
+                            <td data-label="Amount" class="amount">${{ "%.2f"|format(expense.amount) }}</td>
+                            <td data-label="Category"><span class="tag tag-{{ expense.category|lower }}">{{ expense.category }}</span></td>
+                            <td data-label="Date" class="text-sm">{{ expense.spent_on.strftime('%Y-%m-%d') }}</td>
+                            <td data-label="Actions" class="actions">
+                                <div class="action-box">
+                                    <a href="{{ url_for('main.edit_expense', id=expense.id) }}" class="btn-action btn-edit" title="Edit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </a>
+                                    <form action="{{ url_for('main.delete_expense', id=expense.id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                        <button type="submit" class="btn-action btn-delete" title="Delete">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p>No expenses found. Start by adding one!</p>
+            <a href="{{ url_for('main.add_expense') }}" class="btn btn-secondary">Add Your First Expense</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

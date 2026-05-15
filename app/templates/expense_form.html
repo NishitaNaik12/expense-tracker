@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="form-section">
+    <h1>{{ action }} Expense</h1>
+    <div class="card">
+        <form method="POST">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" value="{{ expense.title if expense else '' }}" required placeholder="e.g., Grocery Shopping">
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Amount ($)</label>
+                <input type="number" step="0.01" id="amount" name="amount" value="{{ expense.amount if expense else '' }}" required placeholder="0.00">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled {{ 'selected' if not expense }}>Select Category</option>
+                    {% for cat in ['Food', 'Travel', 'Utilities', 'Others'] %}
+                    <option value="{{ cat }}" {{ 'selected' if expense and expense.category == cat }}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="spent_on">Date</label>
+                <input type="date" id="spent_on" name="spent_on" value="{{ expense.spent_on.strftime('%Y-%m-%d') if expense else today.strftime('%Y-%m-%d') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description (Optional)</label>
+                <textarea id="description" name="description" rows="3" placeholder="Additional details...">{{ expense.description if expense else '' }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">{{ action }} Expense</button>
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
